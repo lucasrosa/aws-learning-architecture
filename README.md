@@ -1,4 +1,9 @@
-Requirements
+## Requirements
+
+
+### Load Balancer
+* Use ALB - Application Load Balancer
+* Load Balancer must be private
 
 ### CloudFormation
 * Everything must be done as IAC
@@ -17,6 +22,7 @@ Requirements
 
 ### EC2
 * Each instance in the auto-scaling group must be in a different availability zone
+* Responses from the webservers must include their private IP (to see if load balancer is working)
 
 ### VPC
 * Database and application instances must be in a private subnet
@@ -41,4 +47,4 @@ Requirements
     * Monitoring
 
 ### VPN
-    * Site to site
+* Site to site
