@@ -1,16 +1,23 @@
 Resources:
-  Ec2Instance:
-    Type: AWS::EC2::Instance
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      InstanceType: t2.micro
+      AvailabilityZones:
+        Fn::GetAZs: ""
+      AutoScalingGroupName: "AWSLearningASG"
+      DesiredCapacity: "3"
+      LaunchConfigurationName: !Ref LaunchConfig
+      MaxSize: "6"
+      MinSize: "1"
+
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
       ImageId: ami-467ca739 # Amazon Linux AMI us-east-1
-      Tags:
-        - Key: Name
-          Value: "EC2 instance"
       SecurityGroups:
-      - Ref: SecurityGroup
-    DeletionPolicy: Delete
-    
+        - Ref: SecurityGroup
+      InstanceType: t2.micro
+
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
