@@ -1,7 +1,16 @@
 Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: false
+      EnableDnsHostnames: true
+      InstanceTenancy: dedicated
+
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
+      VpcId: !Ref VPC
       HealthCheckEnabled: true
       TargetType: instance
       Port: 80
@@ -17,7 +26,7 @@ Resources:
       LaunchConfigurationName: !Ref LaunchConfig
       MaxSize: "6"
       MinSize: "1"
-      TargetGroupArns:
+      TargetGroupARNs:
         - Ref: TargetGroup
 
   LaunchConfig:
@@ -37,3 +46,4 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
