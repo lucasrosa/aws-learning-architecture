@@ -1,4 +1,12 @@
 Resources:
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      TargetType: instance
+      Port: 80
+      Protocol: HTTP
+
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -9,6 +17,8 @@ Resources:
       LaunchConfigurationName: !Ref LaunchConfig
       MaxSize: "6"
       MinSize: "1"
+      TargetGroupArns:
+        - Ref: TargetGroup
 
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
