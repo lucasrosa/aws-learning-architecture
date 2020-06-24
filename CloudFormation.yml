@@ -1,4 +1,36 @@
 Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      IpAddressType: ipv4
+      Name: ALB
+      Scheme: internet-facing
+      Subnets: 
+        - !Ref SubnetA
+        - !Ref SubnetB
+  
+  HTTPlistener:
+   Type: "AWS::ElasticLoadBalancingV2::Listener"
+   Properties:
+     DefaultActions:
+       - Type: "forward"
+         ForwardConfig:
+          TargetGroups:
+            - TargetGroupArn: !Ref TargetGroup
+     LoadBalancerArn: !Ref LoadBalancer
+     Port: 80
+     Protocol: "HTTP"
+  
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  # In order for the resources in a VPC to send and receive traffic from the internet, the following must be true:
+  # - An internet gateway must be attached to the VPC.
+  # - The route tables associated with your public subnet (including custom route tables) must have a route to the internet gateway.
+  # - The security groups associated with your VPC must allow traffic to flow to and from the Internet.
+  # - Any instances in the VPC must either have a public IP address or an attached Elastic IP address.
+
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -6,6 +38,51 @@ Resources:
       EnableDnsSupport: false
       EnableDnsHostnames: true
       InstanceTenancy: dedicated
+  
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  Route:
+    Type: AWS::EC2::Route
+    #DependsOn: GatewayToInternet
+    Properties:
+       RouteTableId: !Ref RouteTable
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId: !Ref InternetGateway
+
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: "us-east-1a"
+
+  SubnetRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetA
+
+  SubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: "us-east-1b"
+
+  SubnetRouteTableAssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetB
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -22,7 +99,6 @@ Resources:
       AvailabilityZones:
         Fn::GetAZs: ""
       AutoScalingGroupName: "AWSLearningASG"
-      DesiredCapacity: "3"
       LaunchConfigurationName: !Ref LaunchConfig
       MaxSize: "6"
       MinSize: "1"
@@ -46,4 +122,3 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPC
