@@ -1,29 +1,69 @@
 Resources:
-  LoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Type: application
-      # IpAddressType: ipv4
-      Name: ALB
-      # Scheme: internet-facing
-      Subnets: 
+      VpcId: !Ref VPC
+      HealthCheckEnabled: true
+      TargetType: instance
+      Port: 80
+      Protocol: HTTP
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: "AWSLearningASG"
+      LaunchConfigurationName: !Ref LaunchConfig
+      MaxSize: "6"
+      MinSize: "1"
+      TargetGroupARNs:
+        - Ref: TargetGroup
+      VPCZoneIdentifier:
         - !Ref SubnetA
         - !Ref SubnetB
+    DependsOn: VPCGatewayAttachment
+
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: ami-467ca739 # Amazon Linux AMI us-east-1
       SecurityGroups:
-        - !Ref ALBSecurityGroup
-  
-  HTTPlistener:
-   Type: "AWS::ElasticLoadBalancingV2::Listener"
-   Properties:
-     DefaultActions:
-       - Type: "forward"
-         ForwardConfig:
-          TargetGroups:
-            - TargetGroupArn: !Ref TargetGroup
-     LoadBalancerArn: !Ref LoadBalancer
-     Port: 80
-     Protocol: "HTTP"
-  
+        - Ref: SecurityGroup
+      InstanceType: t2.micro
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access to instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: name
+          Value: ALASecurityGroup
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access to instances
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: name
+          Value: ALAALBSecurityGroup
+
+
+# VPC
   InternetGateway:
     Type: AWS::EC2::InternetGateway
 
@@ -37,9 +77,9 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: false
-      EnableDnsHostnames: true
-      InstanceTenancy: dedicated
+      # EnableDnsSupport: true
+      # EnableDnsHostnames: true
+      InstanceTenancy: default
       Tags: 
         - Key: name
           Value: ALAVPC
@@ -57,7 +97,6 @@ Resources:
 
   Route:
     Type: AWS::EC2::Route
-    #DependsOn: GatewayToInternet
     Properties:
        RouteTableId: !Ref RouteTable
        DestinationCidrBlock: 0.0.0.0/0
@@ -94,61 +133,3 @@ Resources:
     Properties: 
       RouteTableId: !Ref RouteTable
       SubnetId: !Ref SubnetB
-
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      VpcId: !Ref VPC
-      HealthCheckEnabled: true
-      TargetType: instance
-      Port: 80
-      Protocol: HTTP
-
-  AutoScalingGroup:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    Properties:
-      AutoScalingGroupName: "AWSLearningASG"
-      LaunchConfigurationName: !Ref LaunchConfig
-      MaxSize: "6"
-      MinSize: "1"
-      TargetGroupARNs:
-        - Ref: TargetGroup
-      VPCZoneIdentifier:
-        - !Ref SubnetA
-        - !Ref SubnetB
-    DependsOn: VPCGatewayAttachment
-
-  LaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Properties:
-      ImageId: ami-467ca739 # Amazon Linux AMI us-east-1
-      SecurityGroups:
-        - Ref: SecurityGroup
-      InstanceType: t2.micro
-
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Enable SSH access to instance
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: '22'
-          ToPort: '22'
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPC
-      Tags: 
-        - Key: name
-          Value: ALASecurityGroup
-  ALBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Enable HTTP access to instances
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: '80'
-          ToPort: '80'
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPC
-      Tags: 
-        - Key: name
-          Value: ALAALBSecurityGroup

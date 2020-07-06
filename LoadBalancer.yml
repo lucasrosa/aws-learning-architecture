@@ -1,0 +1,24 @@
+ LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      # IpAddressType: ipv4
+      Name: ALB
+      # Scheme: internet-facing
+      Subnets: 
+        - !Ref SubnetA
+        - !Ref SubnetB
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+  
+  HTTPlistener:
+   Type: "AWS::ElasticLoadBalancingV2::Listener"
+   Properties:
+     DefaultActions:
+       - Type: "forward"
+         ForwardConfig:
+          TargetGroups:
+            - TargetGroupArn: !Ref TargetGroup
+     LoadBalancerArn: !Ref LoadBalancer
+     Port: 80
+     Protocol: "HTTP"
