@@ -3,9 +3,9 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Type: application
-      IpAddressType: ipv4
+      # IpAddressType: ipv4
       Name: ALB
-      Scheme: internet-facing
+      # Scheme: internet-facing
       Subnets: 
         - !Ref SubnetA
         - !Ref SubnetB
@@ -38,6 +38,9 @@ Resources:
       EnableDnsSupport: false
       EnableDnsHostnames: true
       InstanceTenancy: dedicated
+      Tags: 
+        - Key: name
+          Value: ALAVPC
   
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -64,6 +67,9 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.0.0/24
       AvailabilityZone: "us-east-1a"
+      Tags: 
+        - Key: name
+          Value: ALASubnetA
 
   SubnetRouteTableAssociationA:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -77,6 +83,9 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: "us-east-1b"
+      Tags: 
+        - Key: name
+          Value: ALASubnetB
 
   SubnetRouteTableAssociationB:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -96,14 +105,15 @@ Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AvailabilityZones:
-        Fn::GetAZs: ""
       AutoScalingGroupName: "AWSLearningASG"
       LaunchConfigurationName: !Ref LaunchConfig
       MaxSize: "6"
       MinSize: "1"
       TargetGroupARNs:
         - Ref: TargetGroup
+      VPCZoneIdentifier:
+        - !Ref SubnetA
+        - !Ref SubnetB
 
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -122,3 +132,7 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: name
+          Value: ALASecurityGroup
