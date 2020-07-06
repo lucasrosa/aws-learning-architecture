@@ -9,6 +9,8 @@ Resources:
       Subnets: 
         - !Ref SubnetA
         - !Ref SubnetB
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
   
   HTTPlistener:
    Type: "AWS::ElasticLoadBalancingV2::Listener"
@@ -114,6 +116,7 @@ Resources:
       VPCZoneIdentifier:
         - !Ref SubnetA
         - !Ref SubnetB
+    DependsOn: VPCGatewayAttachment
 
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -136,3 +139,16 @@ Resources:
       Tags: 
         - Key: name
           Value: ALASecurityGroup
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access to instances
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: name
+          Value: ALAALBSecurityGroup
