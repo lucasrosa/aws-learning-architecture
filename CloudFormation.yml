@@ -23,7 +23,7 @@ Resources:
      LoadBalancerArn: !Ref LoadBalancer
      Port: 80
      Protocol: "HTTP"
-     
+
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -55,6 +55,23 @@ Resources:
       SecurityGroups:
         - Ref: SecurityGroup
       InstanceType: t2.micro
+    Metadata: # Based on ACG CloudFormation template
+      Comment: Install php and httpd
+      AWS::CloudFormation::Init:
+        config: 
+          packages: 
+            yum:
+              httpd: []
+              php: []
+          files: 
+            /var/www/html/index.php:
+              content: !Sub |
+                <?php print "Hello Lucas!!!"; ?>
+          services: 
+            sysvinit:
+              httpd:
+                enabled: true
+                ensureRunning: true
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -102,8 +119,6 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/16
-      # EnableDnsSupport: true
-      # EnableDnsHostnames: true
       InstanceTenancy: default
       Tags: 
         - Key: name
