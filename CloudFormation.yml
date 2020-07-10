@@ -1,3 +1,8 @@
+Parameters:
+  keyPair: 
+    Description: Amazon EC2 Key Pair
+    Type: AWS::EC2::KeyPair::KeyName
+
 Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -50,6 +55,7 @@ Resources:
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
+      KeyName: !Ref keyPair
       AssociatePublicIpAddress: true
       ImageId: ami-467ca739 # Amazon Linux AMI us-east-1
       SecurityGroups:
