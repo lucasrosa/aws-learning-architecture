@@ -1,0 +1,7 @@
+Resources:
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: aws-learning-arch-assets
+      AccessControl: PublicRead
