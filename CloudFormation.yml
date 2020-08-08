@@ -45,6 +45,7 @@ Resources:
       LaunchConfigurationName: !Ref LaunchConfig
       MaxSize: "6"
       MinSize: "1"
+      DesiredCapacity: "3"
       TargetGroupARNs:
         - Ref: TargetGroup
       VPCZoneIdentifier:
@@ -57,6 +58,7 @@ Resources:
     Properties:
       KeyName: !Ref keyPair
       AssociatePublicIpAddress: true
+      InstanceMonitoring: true
       ImageId: ami-467ca739 # Amazon Linux AMI us-east-1
       SecurityGroups:
         - Ref: SecurityGroup
@@ -80,7 +82,10 @@ Resources:
           files: 
             /var/www/html/index.php:
               content: !Sub |
-                <?php print "Hello Lucas!!!"; ?>
+                <?php print "Hello Lucas!!!";
+                $instance_id = file_get_contents("http://instance-data/latest/meta-data/instance-id");
+                echo "<br>Instance: ". $instance_id; 
+                ?>
           services: 
             sysvinit:
               httpd:
