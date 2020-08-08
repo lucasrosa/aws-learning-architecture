@@ -31,6 +31,9 @@
 
 ### S3
 * Make use of all S3 storage classes  
+* Assets are saved in S3
+* They have a Deletion Prevention with MFA
+* They have ACLs
 
 ### CloudFront 
 * Distribution for S3 content
