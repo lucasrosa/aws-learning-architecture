@@ -11,3 +11,18 @@ Resources:
               SSEAlgorithm: AES256
       VersioningConfiguration:
         Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+        - Id: GlacierRule
+          Prefix: glacier
+          Status: Enabled
+          # Current object version
+          ExpirationInDays: '365'
+          Transitions:
+            - TransitionInDays: '30'
+              StorageClass: GLACIER
+          # Older object versions
+          NoncurrentVersionExpirationInDays: '365'
+          NoncurrentVersionTransitions: 
+            - TransitionInDays: '0'
+              StorageClass: GLACIER
