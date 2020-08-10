@@ -5,3 +5,7 @@ Resources:
     Properties:
       BucketName: aws-learning-arch-assets
       AccessControl: PublicRead
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
