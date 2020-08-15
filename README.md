@@ -13,17 +13,17 @@
 * Important information should be on Output (dns)
 
 ### CloudWatch
-[x] Detailed Monitoring enabled
-* Send notifications to email
-    * CPU reaches 90%
-    * Disk reaches 80%
+- [x] Detailed Monitoring enabled
+- [ ] Send notifications to email
+    [ ] CPU reaches 90%
+    [ ] Disk reaches 80%
 
 ### CloudTrail
-* New EC2 Instance created
+[ ] New EC2 Instance created
 
 ### EC2
-[x] Each instance in the auto-scaling group must be in a different availability zone
-[x] Responses from the webservers must include their private IP (to see if load balancer is working)
+- [x] Each instance in the auto-scaling group must be in a different availability zone
+- [x] Responses from the webservers must include their private IP (to see if load balancer is working)
 
 ### VPC
 * Database and application instances must be in a private subnet
